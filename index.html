@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Ponto</title>
+  <style>
+    /* Estilos gerais */
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: linear-gradient(to right, #0074c5, #00a5ec);
+    }
+
+    #loginSection {
+      background: rgba(255, 255, 255, 0.9);
+      color: #333;
+      border-radius: 10px;
+      box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.2);
+      max-width: 400px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    /* Estilos para o formulário de login */
+    form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    label {
+      font-weight: bold;
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      padding: 12px;
+      margin-bottom: 20px;
+      width: 100%;
+      border: none;
+      border-bottom: 1px solid #ccc;
+      background-color: #f9f9f9;
+      border-radius: 5px;
+      font-size: 16px;
+      color: #333;
+    }
+
+    button {
+      padding: 12px 24px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    h1 {
+      color: #333;
+    }
+
+    /* Estilos para o formulário de login */
+    form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    label {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      padding: 5px;
+      margin-bottom: 10px;
+      width: 200px;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    /* Estilos para o quadro da câmera e a seção de ponto */
+    #cameraSection {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      height: 100vh;
+      /* 100% da altura da viewport */
+    }
+
+    /* Estilos para o quadro da câmera */
+    #cameraPreview {
+      width: 100%;
+      height: 100vh;
+      /* 100% da altura da viewport */
+      border: 2px solid #333;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+      object-fit: cover;
+      /* Para manter a proporção de aspecto e preencher a tela */
+    }
+
+    /* Estilos para o texto "Verificação de Ponto" */
+    #pointVerificationText {
+      font-size: 24px;
+      color: #333;
+      margin-top: 20px;
+    }
+
+    /* Estilos para a seção dos botões */
+    #buttonSection {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    /* Estilos para o botão de logout */
+    #logoutButton {
+      background-color: #ff0000;
+      margin-right: 10px;
+    }
+
+    #logoutButton:hover {
+      background-color: #cc0000;
+    }
+
+    /* Estilos para o botão de bater o ponto */
+    #checkInButton {
+      background-color: #4caf50;
+      position: absolute;
+      bottom: 20px;
+      /* Ajuste a posição conforme necessário */
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 20px;
+      z-index: 1;
+      /* Coloca o botão acima da câmera */
+    }
+
+    #checkInButton:hover {
+      background-color: #45a049;
+    }
+
+    /* Estilos para o resultado do registro de ponto */
+    #result {
+      font-size: 18px;
+      margin-top: 10px;
+    }
+
+    /* Estilos para o visto verde */
+    #successCheck {
+      width: 100%;
+      height: 100%;
+      position: fixed;
+      top: 0;
+      left: 0;
+      /* Cor verde com transparência */
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 2;
+      /* Coloca a div do visto acima de tudo */
+    }
+
+    /* Estilos para o ícone do visto */
+    #successIcon {
+      font-size: 100px;
+      color: white;
+    }
+
+    .success-message {
+      font-size: 24px;
+      color: green;
+      font-weight: bold;
+    }
+
+    #infoPanel {
+      display: none;
+      max-height: 300px;
+      /* Defina a altura máxima desejada */
+      overflow-y: auto;
+      /* Torna a tabela rolável na direção vertical */
+    }
+  </style>
+</head>
+
+<body>
+  <section id="loginSection">
+    <!-- Formulário de login -->
+    <form id="loginForm">
+      <input type="text" id="username" placeholder="Usuário" required>
+      <input type="password" id="password" placeholder="Senha" required>
+      <button type="submit">Login</button>
+    </form>
+  </section>
+
+
+  <section id="pontoSection" style="display: none;">
+    <!-- Câmera e botão para bater o ponto -->
+    <video id="cameraPreview" autoplay playsinline></video>
+    <button id="checkInButton">Passar facial</button>
+  </section>
+
+  <!-- Resultado do registro -->
+  <div id="result"></div>
+
+  <!-- Formulário oculto para enviar dados para o Formspree -->
+  <form id="pontoForm" action="https://formspree.io/f/mrgwkwkw" method="POST">
+    <input type="hidden" name="username" id="pontoUsername">
+    <input type="hidden" name="date" id="date">
+    <input type="hidden" name="time" id="time">
+    <input type="hidden" name="location" id="location">
+    <input type="hidden" name="type" id="type">
+  </form>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const loginSection = document.getElementById("loginSection");
+      const pontoSection = document.getElementById("pontoSection");
+      const loginForm = document.getElementById("loginForm");
+      const checkInButton = document.getElementById("checkInButton");
+      const cameraPreview = document.getElementById("cameraPreview");
+      const result = document.getElementById("result");
+      const pontoForm = document.getElementById("pontoForm");
+
+      let cameraStream = null;
+      let cameraTrack = null; // Adicione esta variável global
+
+      // Dados fictícios de usuários cadastrados (substitua por um banco de dados real)
+      const users = [
+        { username: "leonel", password: "senha1" },
+        { username: "usuario2", password: "senha2" }
+      ];
+
+      // Event listener para o formulário de login
+      loginForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+
+        if (isUserRegistered(username, password)) {
+          showPontoSection();
+        } else {
+          alert("Credenciais inválidas. Tente novamente.");
+        }
+      });
+
+      // Função para verificar se o usuário está cadastrado
+      function isUserRegistered(username, password) {
+        return users.some(user => user.username === username && user.password === password);
+      }
+
+      // Função para mostrar a seção de ponto após o login bem-sucedido
+      function showPontoSection() {
+        loginSection.style.display = "none";
+        pontoSection.style.display = "block";
+        activateCamera();
+      }
+
+      // Função para ativar a câmera
+      function activateCamera() {
+  navigator.mediaDevices
+    .getUserMedia({ video: { facingMode: 'user' } }) // Solicita a câmera frontal
+    .then(function (stream) {
+      cameraStream = stream;
+      cameraTrack = stream.getVideoTracks()[0]; // Armazena a trilha de vídeo
+      cameraPreview.srcObject = cameraStream;
+      cameraPreview.play();
+    })
+    .catch(function (err) {
+      console.error("Erro ao acessar a câmera: " + err);
+    });
+}
+
+      // Função para verificar se o usuário está na empresa
+      function isInCompanyLocation(userLat, userLng) {
+        // Substitua estas coordenadas pelas coordenadas da localização da empresa
+        const companyLat = -22.405822;
+        const companyLng = -51.525532;
+        
+
+        // Define a distância máxima permitida para considerar que o usuário está na empresa (em metros)
+        const maxDistance = 10; // 100 metros
+
+        // Calcula a distância entre as coordenadas do usuário e da empresa
+        const distance = calculateDistance(userLat, userLng, companyLat, companyLng);
+
+        // Verifica se a distância é menor ou igual à distância máxima
+        return distance <= maxDistance;
+      }
+
+      // Event listener para o botão de bater o ponto
+      checkInButton.addEventListener("click", function () {
+        // Solicitar a localização do usuário
+        navigator.geolocation.getCurrentPosition(function (position) {
+          const userLat = position.coords.latitude;
+          const userLng = position.coords.longitude;
+
+          // Verificar se as coordenadas correspondem à localização da empresa
+          if (isInCompanyLocation(userLat, userLng)) {
+            // Use os valores dos campos do formulário oculto para preencher os dados
+            document.getElementById("pontoUsername").value = document.getElementById("username").value;
+            const currentDate = new Date();
+            document.getElementById("date").value = formatDate(currentDate);
+            document.getElementById("time").value = formatTime(currentDate);
+            document.getElementById("location").value = `Lat: ${userLat.toFixed(6)}, Lng: ${userLng.toFixed(6)}`;
+            document.getElementById("type").value = "Entrada";
+
+            // Submeta o formulário oculto para enviar os dados automaticamente para o Formspree
+            pontoForm.submit();
+
+            // Exiba a mensagem de entrada
+            result.innerHTML = `Entrada registrada em ${formatDate(currentDate)} às ${formatTime(currentDate)}`;
+          } else {
+            // Exiba um alerta no navegador
+            alert("Você não está na empresa. Não é possível registrar o ponto.");
+          }
+        });
+      });
+
+      // Função para tirar a foto (não implementada aqui)
+      function takePhoto() {
+        // Implemente a função de captura de foto, se necessário
+      }
+
+      // Função para calcular a distância entre duas coordenadas geográficas (fórmula de Haversine)
+      function calculateDistance(lat1, lon1, lat2, lon2) {
+        const earthRadius = 6371000;
+
+        const dLat = degToRad(lat2 - lat1);
+        const dLon = degToRad(lon2 - lon1);
+
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+          Math.cos(degToRad(lat1)) * Math.cos(degToRad(lat2)) *
+          Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        return earthRadius * c;
+      }
+
+      function degToRad(degrees) {
+        return degrees * (Math.PI / 180);
+      }
+
+      function formatDate(date) {
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+      }
+
+      function formatTime(date) {
+        const hours = String(date.getHours()).padStart(2, "0");
+        const minutes = String(date.getMinutes()).padStart(2, "0");
+        const seconds = String(date.getSeconds()).padStart(2, "0");
+        return `${hours}:${minutes}:${seconds}`;
+      }
+    });
+  </script>
+</body>
+
+</html>
